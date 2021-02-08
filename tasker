@@ -1,0 +1,159 @@
+#!/usr/bin/php
+<?php
+
+ini_set('date.timezone', 'Europe/Moscow');
+error_reporting(-1);
+
+use Carbon\Carbon;
+use Task\Connection;
+
+include 'vendor/autoload.php';
+
+// Связь с отделом
+
+$connection = Connection::instance();
+$connection =  $connection->connect('bot', 'hiro', 123);
+
+
+// Опции
+$option = $argv[1];
+
+// Добавление таска
+if ($option == '-a') {
+	// Текущее время в timestamp
+	$now = (Carbon::now())->timestamp;
+
+	// Время переданная в timestamp
+	$time = $argv[2];
+
+	// Класс переданный в третим аргументом
+	$class = $argv[3];
+
+	if (!empty($class) && !empty($time)) {
+		// Если вместо время указан 'now' то, это означает сейчас
+		if (strpos($time, 'now') !== false && strpos($time, 'now+') === false) {
+			$time = $now;
+		}
+
+		// Если параметр указана так now+1231 - то это означает что к текущему времени добавить еще число после +
+		if (preg_match("#now\+([\d]{1,10})#i", $time, $match)) {
+			$time = $now + $match[1];
+		}
+
+		// Если время сооотвествует формату 2019-09-18_19:32
+		if (preg_match("#\d+-\d+-\d+_\d+:\d+#", $time)) {
+			$explode_time = explode('_', $time);
+			$date = $explode_time[0]; // Это дата - 2019-12-21
+			$time = $explode_time[1]; // Это время - 18:21 
+			$time = Carbon::parse($date . ' ' . $time)->timestamp;
+		}
+
+		// Если имя класса передан как начинаеющего с цифры, то ошибка
+		if (is_numeric($class[0]) !== false) {
+			echo "Как бы сказать, твой класс начинается с цифры._.";
+			die();		
+		}
+		// Добавление таска
+		addTask($time, $class);
+
+	} else {
+		echo "Ну как бы ты не забыл параметр";
+	}
+}
+
+// Удаление таска
+if ($option == '-remove' || $option == '-r') {
+	if (!empty($argv[2]) ) {
+		// Берем ид удаляемого таска
+		$id = $argv[2];
+		// и тут удаляем
+		deleteTask($id);
+	}
+}
+
+
+// Показ текущего времени в таймстапм
+if ($option == '-now' || $option == 'now') {
+	$now = (Carbon::now())->timestamp;
+	echo $now;
+}
+
+// Удаление всех тасков
+if ($option == '-dall' || $option == '-delete_all') {
+	// Удаление всех тасков
+	deleteAllTasks();
+}
+
+// Показ всех запланированных тасков
+if ($option == 'list' || $option == '-list') {
+	listTasks();
+}
+
+// Показ инструкции как пользоватся с этой утилитой
+if ($option == '' || $option == '-h' || $option == '--h' || $option == '--help' || $option == '-help') {
+	echo "Опции:\r\n\t-a (timestamp) (ClassName) - Добавляет просто таск, и после выполнения он удалиться\r\n\t-r (timestamp) (add_time) (ClassName) - Добавляет повторяющий таск\r\n\t-remove (id_task) - Удаляет таск, следующим параметром указываешь id-таска\r\n\t-help - даже незнаю что делает ._.\r\n\t-dall - удаляет все таски\r\n\t-list - показывает все таски\r\n\r\n
+// \tКрч напримерах все ясно будет:\r\n\t1) Добавление: -a 12661718 TelegramClass\r\n\t2) Удаление: -remove 5\r\n\t3) Добавление повторяющего таска: -r 1263233 3600 Telegram_Class \r\n";
+
+}
+
+echo "\r\n";
+
+
+
+
+
+// Удаление таска
+function deleteTask($id) {
+	global $connection;
+	try{
+		$connection->query("DELETE FROM `tasks` WHERE `id` = {$id}");
+		echo "Ты успешно удалил таск с id {$id}\r\n";
+	} catch(PDOException $e) {
+		echo "Неудалось удалить таск: " . $e->getMessage() . "\r\n";
+	}
+}
+
+// Удаление всех  тасков
+function deleteAllTasks() {
+	global $connection;
+	try{
+		$connection->query("TRUNCATE `tasks`");
+		echo "Все таски удалены, доволен?\r\n";
+	} catch(PDOException $e) {
+		echo "Неудалось удалить таски: " . $e->getMessage() . "\r\n";
+	}
+}
+
+// Добавление таска
+function addTask($time, $class) {
+	global $connection;
+	try{
+		$connection->query("INSERT INTO `tasks` (`time`, `call_class`) VALUES ('{$time}', '{$class}')");
+		echo "Успешно добавлен таск, который вызвет класс {$class} в {$time} \r\n";
+	} catch(Exception $e) {
+		echo "Неудалось добавить таск: " . $e->getMessage() . "\r\n";
+	}
+}
+
+
+// Список тасков
+function listTasks() {
+	global $connection;
+
+	$get_tasks = $connection->query('SELECT * FROM `tasks`');
+	$count = $get_tasks->rowCount();
+	$text = "--------------------------------------------------------------\r\n\r\n";
+	if ($count > 0) {
+		$tasks = $get_tasks->fetchAll();
+		foreach ($tasks as $key => $task) {
+			$date_from_timestamp = (new Carbon())->setTimestamp($task['time']);
+			$time = $date_from_timestamp->format('Y-m-d H:i');
+			$text .= "   Вызов произойдет : {{$task['id']}} " . $time . ', класса - ' . $task['call_class'] . "\r\n";
+		}
+			$text .= "\r\n--------------------------------------------------------------\r\n";
+		echo $text;
+	} else {
+		echo "Список тасков пуст(\r\n";
+	}
+
+}
