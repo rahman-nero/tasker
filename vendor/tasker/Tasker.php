@@ -42,10 +42,10 @@ class Tasker
 	* @param $login - и так понятно
 	* @param $password - тоже самое
 	*/
-	public function __construct(String $db, $login = 'root', $password = '')
+	public function __construct()
 	{
 		$this->connection = Connection::instance();
-		$this->connection = $this->connection->connect('bot', 'hiro', 123);
+		$this->connection = $this->connection->connect();
 		$this->carbon = new Carbon();
 		$this->logger = new Logger($this->carbon);
 	}

@@ -18,10 +18,12 @@ class Connection
 	}
 	
 
-	public function connect(String $db, $login = 'root', $password = '')
+	public function connect()
 	{
 		try {
-			return new \PDO("mysql:host=localhost;dbname={$db}", $login, $password, [
+			$config = require dirname(dirname(__DIR__)) . '/config/db.php';
+
+			return new \PDO("mysql:host={$config['host']};dbname={$config['dbname']}", $config['login'], $config['password'], [
 			       \PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
 			       \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
 			       \PDO::ATTR_EMULATE_PREPARES   => false,
@@ -31,5 +33,6 @@ class Connection
 		    die();
 		}
 	}
+
 
 }

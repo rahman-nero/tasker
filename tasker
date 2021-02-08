@@ -10,7 +10,7 @@ include 'vendor/autoload.php';
 
 // Связь с отделом
 $connection = Connection::instance();
-$connection =  $connection->connect('bot', 'hiro', 123);
+$connection =  $connection->connect();
 
 
 // Опции
@@ -89,16 +89,12 @@ if ($option == 'list' || $option == '-list') {
 
 // Показ инструкции как пользоватся с этой утилитой
 if ($option == '' || $option == '-h' || $option == '--h' || $option == '--help' || $option == '-help') {
-	echo "Опции:\r\n\t-a (timestamp) (ClassName) - Добавляет просто таск, и после выполнения он удалиться\r\n\t-r (timestamp) (add_time) (ClassName) - Добавляет повторяющий таск\r\n\t-remove (id_task) - Удаляет таск, следующим параметром указываешь id-таска\r\n\t-help - даже незнаю что делает ._.\r\n\t-dall - удаляет все таски\r\n\t-list - показывает все таски\r\n\r\n
-// \tКрч напримерах все ясно будет:\r\n\t1) Добавление: -a 12661718 TelegramClass\r\n\t2) Удаление: -remove 5\r\n\t3) Добавление повторяющего таска: -r 1263233 3600 Telegram_Class \r\n";
+	echo "Опции:\r\n\t-a (timestamp) (ClassName) - Добавляет просто таск, и после выполнения он удалиться\r\n\t-remove (id_task) - Удаляет таск, следующим параметром указываешь id-таска\r\n\t-help - даже незнаю что делает ._.\r\n\t-dall - удаляет все таски\r\n\t-list - показывает все таски\r\n\r\n
+// \t Примеры:\r\n\t1) Добавление: -a 12661718 TelegramClass\r\n\t2) Удаление: -remove 5\r\n\t2) -list - показ всех тасков\r\n";
 
 }
 
 echo "\r\n";
-
-
-
-
 
 // Удаление таска
 function deleteTask($id) {
