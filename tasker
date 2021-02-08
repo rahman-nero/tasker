@@ -1,6 +1,5 @@
 #!/usr/bin/php
 <?php
-
 ini_set('date.timezone', 'Europe/Moscow');
 error_reporting(-1);
 
@@ -10,7 +9,6 @@ use Task\Connection;
 include 'vendor/autoload.php';
 
 // Связь с отделом
-
 $connection = Connection::instance();
 $connection =  $connection->connect('bot', 'hiro', 123);
 
