@@ -20,7 +20,7 @@ class Example
 	* @param $id_task - это id - таска который сейчас выполняется
 	* @param $time - это время при которых таск должен был выполниться
 	*/
-	public function hadler($id_task, $time)
+	public function handler($id_task, $time)
 	{
 		// тут вы можете выполнять любые действия
 		exec('kdialog --msgbox "Password correct.\n About to connect to server"');
